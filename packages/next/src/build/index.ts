@@ -131,7 +131,7 @@ import {
   loadBindings,
   lockfilePatchPromise,
   teardownTraceSubscriber,
-  teardownHeapProfiler,
+  teardownDhatProfiler,
   createDefineEnv,
 } from './swc'
 import { getNamedRouteRegex } from '../shared/lib/router/utils/route-regex'
@@ -3503,7 +3503,7 @@ export default async function build(
     // Ensure all traces are flushed before finishing the command
     await flushAllTraces()
     teardownTraceSubscriber()
-    teardownHeapProfiler()
+    teardownDhatProfiler()
 
     if (traceUploadUrl && loadedConfig) {
       uploadTrace({

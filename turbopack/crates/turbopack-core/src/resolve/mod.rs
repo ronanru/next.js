@@ -1504,13 +1504,26 @@ async fn handle_after_resolve_plugins(
     .cell())
 }
 
+use turbo_tasks::debug::ValueDebug;
 #[turbo_tasks::function]
 async fn resolve_internal(
     lookup_path: Vc<FileSystemPath>,
     request: Vc<Request>,
     options: Vc<ResolveOptions>,
 ) -> Result<Vc<ResolveResult>> {
-    resolve_internal_inline(lookup_path, request, options).await
+    let x = resolve_internal_inline(lookup_path, request, options).await?;
+    match &*request.await? {
+        Request::Module { module, .. } if module == "@" => {
+            println!(
+                "resolve_internal {:?} {:?} {:?}",
+                lookup_path.await?.path,
+                request.dbg().await?,
+                x.dbg().await?
+            );
+        }
+        _ => {}
+    }
+    Ok(x)
 }
 
 fn resolve_internal_boxed(
@@ -2443,6 +2456,19 @@ async fn resolve_import_map_result(
         ImportMapResult::Alias(request, alias_lookup_path) => {
             let request = *request;
             let lookup_path = alias_lookup_path.unwrap_or(lookup_path);
+            match &*original_request.await? {
+                Request::Module { module, .. } if module == "@" => {
+                    println!(
+                        "resolve_import_map_result {:?} - {:?} {:?} - {:?} {:?}",
+                        result.clone().cell().dbg().await?,
+                        lookup_path.await?.path,
+                        request.dbg().await?,
+                        original_lookup_path.await?.path,
+                        original_request.dbg().await?,
+                    );
+                }
+                _ => {}
+            }
             // We must avoid cycles during resolving
             if request.resolve().await? == original_request
                 && lookup_path.resolve().await? == original_lookup_path

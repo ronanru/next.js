@@ -29,7 +29,7 @@ use turbopack_binding::{
             reference_type::EcmaScriptModulesReferenceSubType,
             resolve::{origin::PlainResolveOrigin, parse::Request, pattern::Pattern},
         },
-        ecmascript::{parse::ParseResult, resolve::esm_resolve, EcmascriptModuleAsset, Parsable},
+        ecmascript::{parse::ParseResult, resolve::esm_resolve, Parsable},
     },
 };
 

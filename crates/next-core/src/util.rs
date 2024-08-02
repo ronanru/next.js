@@ -22,7 +22,7 @@ use turbopack_binding::{
             analyzer::{JsValue, ObjectPart},
             parse::ParseResult,
             utils::StringifyJs,
-            EcmascriptModuleAsset, Parsable,
+            Parsable,
         },
         turbopack::condition::ContextCondition,
     },

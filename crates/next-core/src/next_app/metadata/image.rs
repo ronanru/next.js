@@ -21,7 +21,6 @@ use turbopack_binding::{
         ecmascript::{
             chunk::{EcmascriptChunkPlaceable, EcmascriptExports},
             utils::StringifyJs,
-            EcmascriptModuleAsset,
         },
     },
 };

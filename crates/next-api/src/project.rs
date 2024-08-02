@@ -1,6 +1,6 @@
 use std::path::MAIN_SEPARATOR;
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use indexmap::{indexmap, map::Entry, IndexMap};
 use next_core::{
     all_assets_from_entries,
@@ -175,7 +175,7 @@ pub struct Instrumentation {
 #[turbo_tasks::value]
 pub struct ProjectContainer {
     options_state: State<ProjectOptions>,
-    versioned_content_map: Vc<VersionedContentMap>,
+    versioned_content_map: Option<Vc<VersionedContentMap>>,
 }
 
 #[turbo_tasks::value_impl]
@@ -183,8 +183,10 @@ impl ProjectContainer {
     #[turbo_tasks::function]
     pub fn new(options: ProjectOptions) -> Vc<Self> {
         ProjectContainer {
+            // we only need to enable versioning in dev mode, since build
+            // is assumed to be operating over a static snapshot
+            versioned_content_map: options.dev.then(|| VersionedContentMap::new()),
             options_state: State::new(options),
-            versioned_content_map: VersionedContentMap::new(),
         }
         .cell()
     }
@@ -326,25 +328,19 @@ impl ProjectContainer {
         self.project().hmr_identifiers()
     }
 
-    #[turbo_tasks::function]
-    pub async fn get_versioned_content(
-        self: Vc<Self>,
-        file_path: Vc<FileSystemPath>,
-    ) -> Result<Vc<Box<dyn VersionedContent>>> {
-        let this = self.await?;
-        Ok(this.versioned_content_map.get(file_path))
-    }
-
+    /// Gets a source map for a particular `file_path`. If `dev` mode is
+    /// disabled, this will always return [`OptionSourceMap::none`].
     #[turbo_tasks::function]
     pub async fn get_source_map(
         self: Vc<Self>,
         file_path: Vc<FileSystemPath>,
         section: Option<RcStr>,
     ) -> Result<Vc<OptionSourceMap>> {
-        let this = self.await?;
-        Ok(this
-            .versioned_content_map
-            .get_source_map(file_path, section))
+        Ok(if let Some(map) = self.await?.versioned_content_map {
+            map.get_source_map(file_path, section)
+        } else {
+            OptionSourceMap::none()
+        })
     }
 }
 
@@ -380,7 +376,7 @@ pub struct Project {
 
     mode: Vc<NextMode>,
 
-    versioned_content_map: Vc<VersionedContentMap>,
+    versioned_content_map: Option<Vc<VersionedContentMap>>,
 
     build_id: RcStr,
 
@@ -1072,14 +1068,18 @@ impl Project {
             let client_relative_path = self.client_relative_path();
             let node_root = self.node_root();
 
-            let completion = self.await?.versioned_content_map.insert_output_assets(
-                all_output_assets,
-                node_root,
-                client_relative_path,
-                node_root,
-            );
+            if let Some(map) = self.await?.versioned_content_map {
+                let completion = map.insert_output_assets(
+                    all_output_assets,
+                    node_root,
+                    client_relative_path,
+                    node_root,
+                );
 
-            Ok(completion)
+                Ok(completion)
+            } else {
+                Ok(Completion::immutable())
+            }
         }
         .instrument(span)
         .await
@@ -1090,10 +1090,11 @@ impl Project {
         self: Vc<Self>,
         identifier: RcStr,
     ) -> Result<Vc<Box<dyn VersionedContent>>> {
-        Ok(self
-            .await?
-            .versioned_content_map
-            .get(self.client_relative_path().join(identifier)))
+        if let Some(map) = self.await?.versioned_content_map {
+            Ok(map.get(self.client_relative_path().join(identifier)))
+        } else {
+            bail!("must be in dev mode to hmr")
+        }
     }
 
     #[turbo_tasks::function]
@@ -1139,10 +1140,11 @@ impl Project {
     /// only needed for testing purposes and isn't used in real apps.
     #[turbo_tasks::function]
     pub async fn hmr_identifiers(self: Vc<Self>) -> Result<Vc<Vec<RcStr>>> {
-        Ok(self
-            .await?
-            .versioned_content_map
-            .keys_in_path(self.client_relative_path()))
+        if let Some(map) = self.await?.versioned_content_map {
+            Ok(map.keys_in_path(self.client_relative_path()))
+        } else {
+            bail!("must be in dev mode to hmr")
+        }
     }
 
     /// Completion when server side changes are detected in output assets

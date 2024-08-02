@@ -29,7 +29,7 @@ use turbopack_binding::{
             reference_type::EcmaScriptModulesReferenceSubType,
             resolve::{origin::PlainResolveOrigin, parse::Request, pattern::Pattern},
         },
-        ecmascript::{parse::ParseResult, resolve::esm_resolve, EcmascriptModuleAsset},
+        ecmascript::{parse::ParseResult, resolve::esm_resolve, EcmascriptModuleAsset, Parsable},
     },
 };
 
@@ -265,7 +265,7 @@ async fn build_dynamic_imports_map_for_module(
     server_module: Vc<Box<dyn Module>>,
 ) -> Result<Vc<OptionDynamicImportsMap>> {
     let Some(ecmascript_asset) =
-        Vc::try_resolve_downcast_type::<EcmascriptModuleAsset>(server_module).await?
+        Vc::try_resolve_sidecast::<Box<dyn Parsable>>(server_module).await?
     else {
         return Ok(Vc::cell(None));
     };

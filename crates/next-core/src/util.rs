@@ -22,7 +22,7 @@ use turbopack_binding::{
             analyzer::{JsValue, ObjectPart},
             parse::ParseResult,
             utils::StringifyJs,
-            EcmascriptModuleAsset,
+            EcmascriptModuleAsset, Parsable,
         },
         turbopack::condition::ContextCondition,
     },
@@ -372,9 +372,7 @@ fn parse_route_matcher_from_js_value(
 
 #[turbo_tasks::function]
 pub async fn parse_config_from_source(module: Vc<Box<dyn Module>>) -> Result<Vc<NextSourceConfig>> {
-    if let Some(ecmascript_asset) =
-        Vc::try_resolve_downcast_type::<EcmascriptModuleAsset>(module).await?
-    {
+    if let Some(ecmascript_asset) = Vc::try_resolve_sidecast::<Box<dyn Parsable>>(module).await? {
         if let ParseResult::Ok {
             program: Program::Module(module_ast),
             globals,

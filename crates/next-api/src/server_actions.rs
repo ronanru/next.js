@@ -31,7 +31,7 @@ use turbopack_binding::{
         ecmascript::{
             chunk::EcmascriptChunkPlaceable, parse::ParseResult,
             tree_shake::asset::EcmascriptModulePartAsset, EcmascriptModuleAsset,
-            EcmascriptModuleAssetType,
+            EcmascriptModuleAssetType, Parsable,
         },
     },
 };
@@ -304,13 +304,9 @@ pub fn parse_server_actions<C: Comments>(
 #[turbo_tasks::function]
 async fn parse_actions(module: Vc<Box<dyn Module>>) -> Result<Vc<OptionActionMap>> {
     let parsed = if let Some(ecmascript_asset) =
-        Vc::try_resolve_downcast_type::<EcmascriptModuleAsset>(module).await?
+        Vc::try_resolve_sidecast::<Box<dyn Parsable>>(module).await?
     {
         ecmascript_asset.failsafe_parse()
-    } else if let Some(ecmascript_asset) =
-        Vc::try_resolve_downcast_type::<EcmascriptModulePartAsset>(module).await?
-    {
-        ecmascript_asset.await?.full_module.failsafe_parse()
     } else {
         return Ok(OptionActionMap::none());
     };

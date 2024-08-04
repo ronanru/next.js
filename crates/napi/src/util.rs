@@ -55,6 +55,8 @@ pub struct DhatProfilerGuard(dhat::Profiler);
 
 /// An opaque type potentially wrapping a [`dhat::Profiler`] instance. If we
 /// were not compiled with dhat support, this is an empty struct.
+///
+/// [`dhat::Profiler`]: https://docs.rs/dhat/latest/dhat/struct.Profiler.html
 #[cfg(not(any(feature = "__internal_dhat-heap", feature = "__internal_dhat-ad-hoc")))]
 #[non_exhaustive]
 pub struct DhatProfilerGuard;

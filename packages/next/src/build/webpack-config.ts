@@ -1600,7 +1600,7 @@ export default async function getBaseWebpackConfig(
                               'next/dist/compiled/assert'
                             ),
                             buffer: require.resolve(
-                              'next/dist/compiled/buffer/'
+                              'next/dist/compiled/buffer'
                             ),
                             constants: require.resolve(
                               'next/dist/compiled/constants-browserify'
@@ -1637,7 +1637,7 @@ export default async function getBaseWebpackConfig(
                             string_decoder: require.resolve(
                               'next/dist/compiled/string_decoder'
                             ),
-                            sys: require.resolve('next/dist/compiled/util/'),
+                            sys: require.resolve('next/dist/compiled/util'),
                             timers: require.resolve(
                               'next/dist/compiled/timers-browserify'
                             ),
@@ -1645,8 +1645,8 @@ export default async function getBaseWebpackConfig(
                               'next/dist/compiled/tty-browserify'
                             ),
                             // Handled in separate alias
-                            // url: require.resolve('url/'),
-                            util: require.resolve('next/dist/compiled/util/'),
+                            // url: require.resolve('url'),
+                            util: require.resolve('next/dist/compiled/util'),
                             vm: require.resolve(
                               'next/dist/compiled/vm-browserify'
                             ),
@@ -1654,7 +1654,7 @@ export default async function getBaseWebpackConfig(
                               'next/dist/compiled/browserify-zlib'
                             ),
                             events: require.resolve(
-                              'next/dist/compiled/events/'
+                              'next/dist/compiled/events'
                             ),
                             setImmediate: require.resolve(
                               'next/dist/compiled/setimmediate'

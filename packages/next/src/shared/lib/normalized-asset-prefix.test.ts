@@ -13,6 +13,7 @@ describe('normalizedAssetPrefix', () => {
     expect(normalizedAssetPrefix('/')).toBe('')
   })
 
+  // we expect an empty string because it could be an unnecessary trailing slash
   it('should remove leading slash(es) when assetPrefix has more than one', () => {
     expect(normalizedAssetPrefix('///path/to/asset')).toBe('/path/to/asset')
   })

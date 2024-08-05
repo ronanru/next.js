@@ -16,8 +16,8 @@ export function getSocketUrl(assetPrefix: string | undefined): string {
   const protocol = getSocketProtocol(assetPrefix || '')
 
   if (URL.canParse(prefix)) {
-    // since normalized asset prefix is ensured to be a URL format,
-    // we can safely replace the protocol
+    // since normalized asset prefix is ensured to be in URL format,
+    // we can trust to simply replace the protocol
     return prefix.replace(/^http/, 'ws')
   }
 

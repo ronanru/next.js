@@ -9,6 +9,10 @@ describe('normalizedAssetPrefix', () => {
     expect(normalizedAssetPrefix('')).toBe('')
   })
 
+  it('should return an empty string when assetPrefix is a single slash', () => {
+    expect(normalizedAssetPrefix('/')).toBe('')
+  })
+
   it('should remove leading slash(es) when assetPrefix has more than one', () => {
     expect(normalizedAssetPrefix('///path/to/asset')).toBe('/path/to/asset')
   })
@@ -21,9 +25,9 @@ describe('normalizedAssetPrefix', () => {
     expect(normalizedAssetPrefix('path/to/asset')).toBe('/path/to/asset')
   })
 
-  it('should return a pathname when assetPrefix is a URL', () => {
+  it('should return the URL when assetPrefix is a URL', () => {
     expect(normalizedAssetPrefix('https://example.com/path/to/asset')).toBe(
-      '/path/to/asset'
+      'https://example.com/path/to/asset'
     )
   })
 })

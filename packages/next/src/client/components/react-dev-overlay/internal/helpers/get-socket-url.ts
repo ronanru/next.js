@@ -8,15 +8,19 @@ function getSocketProtocol(assetPrefix: string): string {
     protocol = new URL(assetPrefix).protocol
   } catch {}
 
-  return protocol === 'http:' ? 'ws' : 'wss'
+  return protocol === 'http:' ? 'ws:' : 'wss:'
 }
 
 export function getSocketUrl(assetPrefix: string | undefined): string {
-  const { hostname, port } = window.location
-  const protocol = getSocketProtocol(assetPrefix || '')
-  // if original assetPrefix is a URL with protocol
-  // the prefix should be normalized to pathname
   const prefix = normalizedAssetPrefix(assetPrefix)
+  const protocol = getSocketProtocol(assetPrefix || '')
 
-  return `${protocol}://${hostname}:${port}${prefix}`
+  if (URL.canParse(prefix)) {
+    // since normalized asset prefix is ensured to be a URL format,
+    // we can safely replace the protocol
+    return prefix.replace(/^http/, 'ws')
+  }
+
+  const { hostname, port } = window.location
+  return `${protocol}//${hostname}${port ? `:${port}` : ''}${prefix}`
 }

@@ -29,9 +29,8 @@ use turbopack_binding::{
             virtual_source::VirtualSource,
         },
         ecmascript::{
-            chunk::EcmascriptChunkPlaceable, parse::ParseResult,
-            tree_shake::asset::EcmascriptModulePartAsset, EcmascriptModuleAsset,
-            EcmascriptModuleAssetType, Parsable,
+            chunk::EcmascriptChunkPlaceable, parse::ParseResult, EcmascriptModuleAssetType,
+            Parsable,
         },
     },
 };
@@ -240,7 +239,7 @@ async fn to_rsc_context(
         module.content(),
     );
     let ty = if let Some(module) = Vc::try_resolve_sidecast::<Box<dyn Parsable>>(module).await? {
-        if *module.await?.ty().await? == EcmascriptModuleAssetType::Ecmascript {
+        if *module.ty().await? == EcmascriptModuleAssetType::Ecmascript {
             ReferenceType::EcmaScriptModules(EcmaScriptModulesReferenceSubType::Undefined)
         } else {
             ReferenceType::TypeScript(TypeScriptReferenceSubType::Undefined)

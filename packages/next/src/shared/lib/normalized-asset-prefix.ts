@@ -1,6 +1,5 @@
 export function normalizedAssetPrefix(assetPrefix: string | undefined): string {
-  // if assetPrefix is a URL, we return the pathname
-  if (assetPrefix?.startsWith('http')) {
+  if (assetPrefix && URL.canParse(assetPrefix)) {
     return new URL(assetPrefix).pathname
   }
 
